@@ -1,1 +1,1 @@
-web: node index.ts
+bot: node index.ts

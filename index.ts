@@ -8,6 +8,8 @@ const jwt:any = require('jsonwebtoken');
 dotenv.config();
 
 
+const url = require('url');
+
 const mongoServer = require(__dirname + '/config/db.ts');
 mongoServer();
 
@@ -24,7 +26,30 @@ app.use(express.json());
 app.use(express.static(__dirname + '/Form/styles'));
 
 
-const User = require("./model/User");
+const User = require("./model/user");
+
+const multer  = require('multer')
+const storage = multer.memoryStorage();
+const upload = multer({storage: storage});
+
+const uuid= require("uuid")
+
+
+const {S3Client, PutObjectCommand, GetObjectCommand} = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
+const bucketName=process.env.BUCKET_NAME;
+const bucketRegion=process.env.BUCKET_REGION;
+const accessKey=process.env.ACCESS_KEY;
+const secretAccessKey=process.env.SECRET_ACCESS_KEY;
+
+const s3 = new S3Client({
+    credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretAccessKey,
+    },
+    region: bucketRegion,
+})
 
 app.get('/login', (req:any, res:any) => {
     res.sendFile(__dirname+'/Form/src/login.html');
@@ -156,6 +181,53 @@ app.post('/register',[
     }
 })
 
+
+app.post('/upload', upload.single('image'),  async (req:any, res:any) => {
+    console.log(req.file);
+    const params = {
+        Bucket: bucketName,
+        Key: uuid.v4(),
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+    }
+
+    const command = new PutObjectCommand(params);
+
+try{
+    await s3.send(command);
+    res.send({
+        status: 200,
+        message: "Success",
+        img_id: params.Key,
+    })
+} 
+catch(err){
+    console.log(err);
+    res.send({
+        status:500,
+        message: "Error Uploading Image"
+    })
+}
+})
+
+app.get('/:imageId', async(req: any, res:any) => {
+    const myUrl = req.url;
+    const imageId = myUrl.slice(1);
+    console.log(imageId);
+    const getObjparams = {
+        Bucket: bucketName,
+        Key: imageId
+    }
+    const command = new GetObjectCommand(getObjparams);
+    try{
+        const imageURL =  await getSignedUrl(s3, command);
+        console.log(imageURL);
+        res.send(imageURL);
+    }
+    catch(err) {
+        console.log(err);
+    }
+})
 
     
 const port:any = process.env.PORT || 8000;

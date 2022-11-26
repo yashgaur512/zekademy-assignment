@@ -32,7 +32,7 @@ Now the server should start and you can see an image like below in your terminal
 You can now send post and get requests using Postman or through the browser.
 
 **Please Note**
-If using POSTMAN: 
--> Send post requests using x-www-form-urlencoded for register or login data
+If using POSTMAN: <br>
+-> Send post requests using x-www-form-urlencoded for register or login data<br>
 -> Send post requests for image using form-data
 <img width="1281" alt="Screenshot 2022-11-26 at 7 34 53 PM" src="https://user-images.githubusercontent.com/73823653/204092844-f431664e-f0cb-4177-9644-73215022073c.png">

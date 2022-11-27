@@ -156,8 +156,8 @@ app.post('/register',[
         let transport = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
-                user: 'yash.gaur.ug20@nsut.ac.in',
-                pass: 'ntmoglfiiuhzajdk'
+                user: 'yash.gaur.e@gmail.com',
+                pass: 'eiqbfwlsymtwxxev'
             }
         });
 
